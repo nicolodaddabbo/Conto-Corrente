@@ -26,18 +26,30 @@ namespace daddabbo._4j.conto.corrente
             this.iban_destinatario = iban_destinatario;
         }
 
-        public void EffettuaBonifico(double importo)
+        public string EffettuaBonifico(double importo)
         {
             /* Ottieni i 2 conti corrente dalla banca e sottrai saldo al mittente e 
              * aggiungi al destinatario l'importo */
+            string mittente;
 
             conto_mittente = banca.getConto(iban_mittente);
             conto_destinatario = banca.getConto(iban_destinatario);
 
-            conto_mittente.Preleva(importo);
-            conto_destinatario.IncrementaSaldo(importo);
-            conto_destinatario.DecrementaMovimenti();
-            dataTransazione = DateTime.Now;
+            mittente = conto_mittente.Preleva(importo);
+            if (mittente == "Hai prelevato con successo")
+            {
+                conto_destinatario.Bonifico(importo);
+                dataTransazione = DateTime.Now;
+                Movimento movimentoDest = new Movimento(DateTime.Now, "bonifico ricevuto", importo, conto_destinatario.Intestatario);
+                Movimento movimentoMitt = new Movimento(DateTime.Now, "bonifico effettuato", importo, conto_mittente.Intestatario);
+                banca.AddMovimento(movimentoDest);
+                banca.AddMovimento(movimentoMitt);
+                return "Bonifico effettuato con successo";
+            } else
+            {
+                return "Il saldo del mittente è minore dell'importo";
+            }
+           
         }
     }
 }

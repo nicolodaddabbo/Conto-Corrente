@@ -10,8 +10,12 @@ namespace daddabbo._4j.conto.corrente
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Progetto Conto Corrente");
-            Console.WriteLine("Sviluppato da Nicolò D'Addabbo, Dennis Dong e Fabio De Luna\n");
+            // CAMBIA PROPERTIES CHE NON DEVONO ESSERE PUBLIC
+            // CAMBIA BONIFICO
+            Console.WriteLine("\n-----------------------------------------------------------");
+            Console.WriteLine("\nProgetto Conto Corrente");
+            Console.WriteLine("Sviluppato da Nicolò D'Addabbo, Dennis Dong e Fabio De Luna");
+            Console.WriteLine("\n-----------------------------------------------------------\n");
 
             /***CREAZIONE BANCA***/
 
@@ -53,7 +57,7 @@ namespace daddabbo._4j.conto.corrente
                         break;
                     case 8:
                         Console.WriteLine("\n------------------------------");
-                        Console.WriteLine("\nElenco clienti della banca " + banca.Nome);
+                        Console.WriteLine("Elenco clienti della banca " + banca.Nome);
                         foreach(ContoCorrente _conto in banca.conti)
                         {
                             Console.WriteLine(_conto.Intestatario.Nome + " IBAN: " + _conto.Iban);
@@ -73,7 +77,7 @@ namespace daddabbo._4j.conto.corrente
                             {
                                 ibanTrovato = true;
                                 Console.WriteLine("\n------------------------------\n");
-                                Console.WriteLine("Il saldo del conto " + ibanVerficare + " è di: " + c.Saldo);
+                                Console.WriteLine("Il saldo del conto " + ibanVerficare + " è di: " + c.getSaldo());
                                 Console.WriteLine("\n------------------------------\n");
                             }
                         }
@@ -88,7 +92,7 @@ namespace daddabbo._4j.conto.corrente
                 }
                 selezione = StampaMenu();
             }
-            Console.WriteLine("Per terminare il programma premenre un qualunque tasto...");      
+            Console.WriteLine("Per terminare il programma premere un qualunque tasto...");      
             Console.ReadKey();
         }
 
@@ -113,7 +117,7 @@ namespace daddabbo._4j.conto.corrente
                     Console.WriteLine("10 - Stampa saldo conto");
                     Console.WriteLine("11 - Aggiungi nuovo conto a cliente");
                     Console.WriteLine("\n99 - Esci");
-                    Console.WriteLine("\n------------------------------\n");
+                    Console.WriteLine("------------------------------\n");
                     Console.Write("Selezione > ");
                     selezione = int.Parse(Console.ReadLine());
                     Console.WriteLine("\n");
@@ -140,8 +144,10 @@ namespace daddabbo._4j.conto.corrente
                     Console.WriteLine("1 - Modifica nome");
                     Console.WriteLine("2 - Modifica indirizzo");
                     Console.WriteLine("\n99 - Indietro");
-                    Console.WriteLine("\n------------------------------\n");
+                    Console.WriteLine("------------------------------\n");
+                    Console.Write("Selezione > ");
                     selezione = int.Parse(Console.ReadLine());
+                    Console.WriteLine("\n");
 
                 }
                 catch
@@ -210,8 +216,47 @@ namespace daddabbo._4j.conto.corrente
             }
 
             Intestatario intestatario = new Intestatario(nome, cf, telefono, mail, indirizzo, dataNascita);
-            Console.WriteLine("Intestatario inserito correttamente");
+            Console.WriteLine("[*] Intestatario inserito correttamente...");
             banca.AddCliente(intestatario);
+
+            int movimentiGratis = -1;
+            do
+            {
+                try
+                {
+                    Console.Write("\nInserire numero massimo di movimenti gratuiti: ");
+                    movimentiGratis = int.Parse(Console.ReadLine());
+                    if(movimentiGratis < 0)
+                    {
+                        Console.WriteLine("Inserire un numero positivo");
+                    }
+                }
+                catch
+                {
+                    Console.WriteLine("Errore nell'inserimento dei dati");
+                    movimentiGratis = -1;
+                }
+            } while (movimentiGratis < 0);
+
+            double aggiuntivoMovimenti = -1;
+            do
+            {
+                try
+                {
+                    Console.Write("\nInserire valore da aggiungere in caso si superino i movimenti gratuiti: ");
+                    aggiuntivoMovimenti = double.Parse(Console.ReadLine());
+                    if (aggiuntivoMovimenti < 0)
+                    {
+                        Console.WriteLine("Inserire un numero positivo");
+                    }
+                }
+                catch
+                {
+                    Console.WriteLine("Errore nell'inserimento dei dati");
+                    aggiuntivoMovimenti = -1;
+                }
+            } while (movimentiGratis < 0);
+
             string risp;
             do
             {
@@ -220,17 +265,29 @@ namespace daddabbo._4j.conto.corrente
 
                 if(risp == "si" || risp == "sì")
                 {
-                    Console.WriteLine("Creazione conto online...");
-                    ContoCorrente contoOnline = new ContoOnLine(intestatario, 100, "IT39" + iban_casuale.Next(10000, 1000000), banca, 2500);
-                    Console.WriteLine("Conto corrente creato con numero massimo di movimenti pari a 100, un prelievo massimo di 2500 e con iban: " + contoOnline.Iban + "\n\n");
+                    double maxPrelievo = -1;
+
+                    do
+                    {
+                        Console.Write("Inserire cifra massima prelevabile: ");
+                        maxPrelievo = double.Parse(Console.ReadLine());
+                        if(maxPrelievo < 0)
+                        {
+                            Console.WriteLine("Inserire un valore positivo");
+                        }
+                    } while (maxPrelievo < 0);
+                    
+                    Console.WriteLine("[+] Creazione conto online...");
+                    ContoCorrente contoOnline = new ContoOnLine(intestatario, movimentiGratis, "IT39" + iban_casuale.Next(10000, 1000000), banca, maxPrelievo, aggiuntivoMovimenti);
+                    Console.WriteLine("[*] Conto corrente creato con numero massimo di movimenti pari a 100, un prelievo massimo di 2500 e con iban: " + contoOnline.Iban + "\n\n");
                 } else if (risp == "no")
                 {
-                    Console.WriteLine("Creazione del conto...");
+                    Console.WriteLine("[+] Creazione del conto...");
 
-                    ContoCorrente conto = new ContoCorrente(intestatario, 100, "IT39" + iban_casuale.Next(10000, 1000000), banca);
+                    ContoCorrente conto = new ContoCorrente(intestatario, movimentiGratis, "IT39" + iban_casuale.Next(10000, 1000000), banca, aggiuntivoMovimenti);
                     banca.AddConto(conto);
 
-                    Console.WriteLine("Conto corrente creato con numero massimo di movimenti pari a 100 e con iban: " + conto.Iban + "\n\n");
+                    Console.WriteLine("[*] Conto corrente creato con numero massimo di movimenti pari a 100 e con iban: " + conto.Iban + "\n\n");
                 }
                 else
                 {
@@ -265,7 +322,7 @@ namespace daddabbo._4j.conto.corrente
             }
             else
             {
-                Console.WriteLine("Inserire dati cliente...\n");
+                Console.WriteLine("[+] Inserire dati cliente...\n");
                 Console.Write("\nInserisci nome: ");
                 nome = Console.ReadLine();
 
@@ -308,7 +365,7 @@ namespace daddabbo._4j.conto.corrente
                 intestatario.Telefono = telefono;
                 intestatario.DataNascita = dataNascita;
             }
-            Console.WriteLine("Intestatario modificato correttamente");
+            Console.WriteLine("[*] Intestatario modificato correttamente");
         }
 
         public static void StampaMovimenti(Banca banca)
@@ -326,6 +383,8 @@ namespace daddabbo._4j.conto.corrente
                         Console.WriteLine("2 - Stampa movimenti di un dato cliente");
                         Console.WriteLine("3 - Stampa movimenti di un dato cliente in un dato giorno");
                         Console.WriteLine("\n99 - Indietro");
+                        Console.WriteLine("------------------------------\n");
+                        Console.Write("Selezione > ");
                         selezione = int.Parse(Console.ReadLine());
                         if (selezione != 1 && selezione != 2 && selezione != 3 && selezione != 99)
                         {
@@ -460,6 +519,7 @@ namespace daddabbo._4j.conto.corrente
                 trovato = false;
                 Console.Write("\nInserire IBAN destinatario: ");
                 string ibanDestinatario = Console.ReadLine().ToString();
+                string risBonifico;
                 foreach (ContoCorrente c in banca.conti)
                 {
                     if (c.Iban == ibanDestinatario)
@@ -476,8 +536,18 @@ namespace daddabbo._4j.conto.corrente
                         Console.Write("\nInserire importo bonifico: ");
                         importo = double.Parse(Console.ReadLine().ToString());
                     } while (importo < 0);
-                    bonifico.EffettuaBonifico(importo);
-                    Console.WriteLine("Bonifico dal valore di " + importo + " euro effettuato all'ora " + DateTime.Now);
+
+                    risBonifico = bonifico.EffettuaBonifico(importo);
+
+                    if(risBonifico == "Bonifico effettuato con successo")
+                    {
+                        Console.WriteLine("Bonifico dal valore di " + importo + " euro effettuato all'ora " + DateTime.Now);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Errore il tuo saldo è minore del prelievo richiesto");
+                    }
+                    
                 }
                 else
                 {
@@ -507,26 +577,26 @@ namespace daddabbo._4j.conto.corrente
 
         public static void EseguiVersamento(Banca banca)
         {
-            Console.WriteLine("Inserire IBAN conto: ");
+            Console.Write("Inserire IBAN conto: ");
             string iban = Console.ReadLine();
 
             ContoCorrente conto = banca.getConto(iban);
 
-            Console.WriteLine("Inserire importo versamento: ");
+            Console.Write("Inserire importo versamento: ");
             double importo = double.Parse(Console.ReadLine());
 
-            conto.IncrementaSaldo(importo);
+            conto.Versamento(importo);
             Console.WriteLine("Versamento di " + importo + " euro effettuato");
         }
 
         public static void EseguiPrelievo(Banca banca)
         {
-            Console.WriteLine("Inserire IBAN conto: ");
+            Console.Write("Inserire IBAN conto: ");
             string iban = Console.ReadLine();
 
             ContoCorrente conto = banca.getConto(iban);
 
-            Console.WriteLine("Inserire importo prelievo: ");
+            Console.Write("Inserire importo prelievo: ");
             double importo = double.Parse(Console.ReadLine());
 
             string risultatoPrelievo = conto.Preleva(importo);
@@ -571,18 +641,67 @@ namespace daddabbo._4j.conto.corrente
                     }
                 } while (risposta != "si" && risposta != "sì" && risposta != "no");
 
+                int movimentiGratis = -1;
+                do
+                {
+                    try
+                    {
+                        Console.Write("\nInserire numero massimo di movimenti gratuiti: ");
+                        movimentiGratis = int.Parse(Console.ReadLine());
+                        if (movimentiGratis < 0)
+                        {
+                            Console.WriteLine("Inserire un numero positivo");
+                        }
+                    }
+                    catch
+                    {
+                        Console.WriteLine("Errore nell'inserimento dei dati");
+                        movimentiGratis = -1;
+                    }
+                } while (movimentiGratis < 0);
+
+                double aggiuntivoMovimenti = -1;
+                do
+                {
+                    try
+                    {
+                        Console.Write("\nInserire valore da aggiungere in caso si superino i movimenti gratuiti: ");
+                        aggiuntivoMovimenti = double.Parse(Console.ReadLine());
+                        if (aggiuntivoMovimenti < 0)
+                        {
+                            Console.WriteLine("Inserire un numero positivo");
+                        }
+                    }
+                    catch
+                    {
+                        Console.WriteLine("Errore nell'inserimento dei dati");
+                        aggiuntivoMovimenti = -1;
+                    }
+                } while (movimentiGratis < 0);
+
                 if (risposta == "no")
                 {
                     Console.WriteLine("Creazione del conto...");
-                    ContoCorrente conto = new ContoCorrente(cliente, 100, "IT39" + iban_casuale.Next(10000, 1000000), banca);
+                    ContoCorrente conto = new ContoCorrente(cliente, movimentiGratis, "IT39" + iban_casuale.Next(10000, 1000000), banca, aggiuntivoMovimenti);
                     banca.AddConto(conto);
                     cliente.AddConto(conto);
 
                     Console.WriteLine("Conto corrente creato con numero massimo di movimenti pari a 100 e con iban: " + conto.Iban + "\n\n");
                 } else
                 {
+                    double maxPrelievo = -1;
+
+                    do
+                    {
+                        Console.Write("Inserire cifra massima prelevabile: ");
+                        maxPrelievo = double.Parse(Console.ReadLine());
+                        if (maxPrelievo < 0)
+                        {
+                            Console.WriteLine("Inserire un valore positivo");
+                        }
+                    } while (maxPrelievo < 0);
                     Console.WriteLine("Creazione conto online...");
-                    ContoCorrente contoOnline = new ContoOnLine(cliente, 100, "IT39" + iban_casuale.Next(10000, 1000000), banca, 2500);
+                    ContoCorrente contoOnline = new ContoOnLine(cliente, movimentiGratis, "IT39" + iban_casuale.Next(10000, 1000000), banca, maxPrelievo, aggiuntivoMovimenti);
                     Console.WriteLine("Conto corrente creato con numero massimo di movimenti pari a 100, un prelievo massimo di 2500 e con iban: " + contoOnline.Iban + "\n\n");
                 }
             }

@@ -12,9 +12,10 @@ namespace daddabbo._4j.conto.corrente
     public class ContoCorrente
     {
         public Intestatario Intestatario { get; } // Intestatario del conto
-        public int NMovimenti { get; set; } // Numero movimenti effettuati
+        protected int NMovimenti;// Numero movimenti effettuati
         protected int maxMovimenti; // Numero massimo di movimenti gratuiti
-        public double Saldo { get; set; } // Soldi depositati sul conto
+        protected double saldo; // Soldi depositati sul conto
+        private double aggiuntivoMovimento;
         public string Iban { get; set; } // IBAN del conto corrente
         public Banca Banca { get; set; }
 
@@ -24,13 +25,14 @@ namespace daddabbo._4j.conto.corrente
         /// <param name="intestatario">Intestatario del conto</param>
         /// <param name="maxMovimenti">Numero massimo di movimenti gratuiti</param>
         /// <param name="iban">IBAN del conto corrente</param>
-        public ContoCorrente(Intestatario intestatario, int maxMovimenti, string iban, Banca banca)
+        public ContoCorrente(Intestatario intestatario, int maxMovimenti, string iban, Banca banca, double aggiuntivoMovimento)
         {
             this.Intestatario = intestatario;
             this.maxMovimenti = maxMovimenti;
             this.Iban = iban;
-            Saldo = 0;
+            saldo = 0;
             this.Banca = banca;
+            this.aggiuntivoMovimento = aggiuntivoMovimento;
         }
 
         /// <summary>
@@ -46,7 +48,7 @@ namespace daddabbo._4j.conto.corrente
              * infine il metodo incrementa di uno
              * il numero di movimenti ossia l’attributo nMovimenti */
 
-            if (x > Saldo)
+            if (x > saldo)
             {
                 return "Errore il tuo saldo è minore del prelievo richiesto";
             }
@@ -54,7 +56,7 @@ namespace daddabbo._4j.conto.corrente
             {
                 if (NMovimenti < maxMovimenti)
                 {
-                    Saldo = Saldo - x;
+                    saldo = saldo - x;
                     Movimento movimento = new Movimento(DateTime.Now, "prelievo", x, Intestatario);
                     Banca.AddMovimento(movimento);
                     NMovimenti++;
@@ -62,7 +64,7 @@ namespace daddabbo._4j.conto.corrente
                 }
                 else
                 {
-                    Saldo = Saldo - x - 0.50;
+                    saldo = saldo - x - 0.50;
                     Movimento movimento = new Movimento(DateTime.Now, "prelievo", x - 0.50, Intestatario);
                     Banca.AddMovimento(movimento);
                     NMovimenti++;
@@ -74,22 +76,28 @@ namespace daddabbo._4j.conto.corrente
         /// <summary>
         /// Metodo per incrementare il saldo di x
         /// </summary>
-        /// <param name="x">Importo da incrementare</param>
-        public void IncrementaSaldo(double x)
+        /// <param name="x">Importo da versare</param>
+        public void Versamento(double x)
         {
             // Versamento
-            Saldo = Saldo + x;
+            saldo = saldo + x;
             NMovimenti++;
             Movimento movimento = new Movimento(DateTime.Now, "versamento", x, Intestatario);
             Banca.AddMovimento(movimento);
         }
 
         /// <summary>
-        /// In seguito a un bonifico il destinatario non ha un incremento dei movimenti
+        /// Incrementa il saldo in seguito a un bonifico
         /// </summary>
-        public void DecrementaMovimenti()
+        /// <param name="x">Importo del bonifico</param>
+        public void Bonifico(double x)
         {
-            NMovimenti--;
+            saldo = saldo + x;
+        }
+
+        public double getSaldo()
+        {
+            return saldo;
         }
     }
 }

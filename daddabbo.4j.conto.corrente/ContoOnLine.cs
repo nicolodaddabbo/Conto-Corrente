@@ -11,7 +11,7 @@
         /// <param name="maxMovimenti">Numero massimo di movimenti gratuiti</param>
         /// <param name="iban">Iban del conto</param>
         /// <param name="maxPrelievo">Cifra massima prelevabile</param>
-        public ContoOnLine(Intestatario intestatario, int maxMovimenti, string iban, Banca banca, double maxPrelievo) : base(intestatario, maxMovimenti, iban, banca)
+        public ContoOnLine(Intestatario intestatario, int maxMovimenti, string iban, Banca banca, double maxPrelievo, double aggiuntivoMovimento) : base(intestatario, maxMovimenti, iban, banca, aggiuntivoMovimento)
         {
             this.maxPrelievo = maxPrelievo;
         }
